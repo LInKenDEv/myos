@@ -6883,10 +6883,17 @@ if isStudio then
 end
 
 -- THIS IS THE DEBUG DEMO, ONLY USED WHEN TESTING NEW ELEMENTS AND CODE
---[[if isStudio then
+if isStudio then
     window = Luna:CreateWindow({LoadingEnabled = false})
     t1 = window:CreateTab()
     t2 = window:CreateTab({ Name = "Tab 2", Icon = "location_searching"})
+
+	for _, tabBtn in ipairs(window.Navigation.Tabs:GetChildren()) do
+        if tabBtn:IsA("Frame") and tabBtn.Name ~= "InActive Template" then
+            makeTabDraggable(tabBtn, tabBtn.Parent)
+        end
+    end
+	
     Luna:Notification({ 
         Title = "Welcome to Luna",
         Icon = "sparkle",
@@ -6926,7 +6933,7 @@ end
     local d = t1:CreateDropdown({Name = "test", Options = {"Apples", "Bananas", "Strawberries", "Elixir"}, Description = "MultiOptions", MultipleOptions = true, Callback = function(t) print(t) end, CurrentOption = {"Apples", "Elixir"}})
     t1:CreateDropdown({Callback = function(t) print(unpack(t)) end})
     t1:CreateDropdown({Description = "Special Type - Player", Callback = "", SpecialType = "Player"})
-end]]--
+end]]
 
 task.delay(4, function() 
 	Luna:LoadAutoloadConfig()
