@@ -1549,6 +1549,55 @@ local PresetGradients = {
 	Blossom = {Color3.fromRGB(255, 165, 243), Color3.fromRGB(213, 129, 231), Color3.fromRGB(170, 92, 218)},
 }
 
+-- Paste this helper function anywhere in Ui.lua (after your other utility functions is a good spot)
+local function makeTabDraggable(tabButton, parent)
+    local UserInputService = game:GetService("UserInputService")
+    local TweenService = game:GetService("TweenService")
+    local dragging = false
+    local dragStart
+    local origPos
+    local mouseMoveConn, mouseUpConn
+
+    tabButton.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            origPos = tabButton.Position
+            tabButton.ZIndex = 50
+
+            mouseMoveConn = UserInputService.InputChanged:Connect(function(moveInput)
+                if dragging and moveInput.UserInputType == Enum.UserInputType.MouseMovement then
+                    local delta = moveInput.Position - dragStart
+                    tabButton.Position = origPos + UDim2.new(0, delta.X, 0, delta.Y)
+
+                    for _, other in ipairs(parent:GetChildren()) do
+                        if other ~= tabButton and other:IsA("Frame") and other.Visible then
+                            local abs = other.AbsolutePosition
+                            local size = other.AbsoluteSize
+                            if moveInput.Position.X > abs.X and moveInput.Position.X < abs.X + size.X and
+                               moveInput.Position.Y > abs.Y and moveInput.Position.Y < abs.Y + size.Y then
+                                local temp = other.LayoutOrder
+                                other.LayoutOrder = tabButton.LayoutOrder
+                                tabButton.LayoutOrder = temp
+                            end
+                        end
+                    end
+                end
+            end)
+
+            mouseUpConn = UserInputService.InputEnded:Connect(function(upInput)
+                if upInput.UserInputType == Enum.UserInputType.MouseButton1 and dragging then
+                    dragging = false
+                    tabButton.ZIndex = 1
+                    TweenService:Create(tabButton, TweenInfo.new(0.15, Enum.EasingStyle.Exponential), {Position = UDim2.new(0,0,0,0)}):Play()
+                    if mouseMoveConn then mouseMoveConn:Disconnect() end
+                    if mouseUpConn then mouseUpConn:Disconnect() end
+                end
+            end)
+        end
+    end)
+end
+
 local function GetIcon(icon, source)
 	if source == "Custom" then
 		return "rbxassetid://" .. icon
